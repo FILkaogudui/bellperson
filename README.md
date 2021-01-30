@@ -6,6 +6,7 @@
 - [FOO-TEST]我是鱼饵
 - [FOO-C2]devid
 - [FOO]石头
+<<<<<<< HEAD
 - [FOO]Waitting for you ...
 
 # Add 3080 Branch
@@ -31,6 +32,16 @@
 - some calculations with cpus change to parallel.
 - change params special for 2080Ti. because it has 68 SMs and 64 SP per SM.
 - we are going on with more optimizations. May 100s even more can be saved.
+=======
+- [FOO]jerry
+- [FOO]Waitting for you ...
+# Add 3080 dev Branch
+- AMD 3970x 12min and can be onchain now.
+- tune based on 3090.
+
+# C2 in 880s tested.
+- this is special for 3080, checkout from 3090, many things to do.
+>>>>>>> f4b4d1281678e9afcb3e36bbebf1fcd7c1073788
 - Team work requests are welcome!
 
 From ZQBC
