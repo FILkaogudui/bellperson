@@ -1,8 +1,19 @@
+# Contributors
+- [FOO]jackoelv
+- [FOO]ROy
+- [FOO]Gabe
+- [FOO-Hacker]Jerry
+- [FOO-TEST]我是鱼饵
+- [FOO-C2]devid
+- [FOO]石头
+- [FOO]jerry
+- [FOO]Waitting for you ...
+# Add 3080 dev Branch
+- AMD 3970x 12min and can be onchain now.
+- tune based on 3090.
+
 # C2 in 880s tested.
-- this is special for 2080Ti, may not work with any other GPU cards. because different gpu have different cuda-cores and mem.
-- some calculations with cpus change to parallel.
-- change params special for 2080Ti. because it has 68 SMs and 64 SP per SM.
-- we are going on with more optimizations. May 100s even more can be saved.
+- this is special for 3080, checkout from 3090, many things to do.
 - Team work requests are welcome!
 
 From ZQBC
@@ -35,6 +46,8 @@ cd ./lotus_code_path
 RUSTFLAGS="-C target-cpu=native -g" FFI_BUILD_FROM_SOURCE=1 make clean all
 ```
 
+> enjoy it!
+
 # DONATION
 
 Jennifer suggested that I should have a donation wallet.
@@ -45,12 +58,25 @@ my wallet addr:
 
 > f1ki5mgbm4cyz43oamnbvv5bjrqdsvkphuxxs2h4a
 
-# IMPORTANT NOTICE
+# FAQ
 
-> the branch is 2080Ti, not the master.
+> openCL error
 
-> enjoy it!
+ if you see error like this:
+```bash
+Status error code: CL_MEM_OBJECT_ALLOCATION_FAILURE (-4)
+```
+ because the MEM needs exceeds maxinum gpu mem. I am looking for new solution to caculate the suitable mem needs.
+a temporary solution is change the variable ：
+- src/gpu/multiexp.rs
+```rust
+324: jack_chunk = (jack_chunk as f64 / 10f64).ceil() as usize;
+```
+ you can increase `10f64` to `11f64` even bigger to reduce mem needs.
+ I am trying a new solution which change window_size for lower cost of mem. 
+ In prover.rs, b_g2_aux caculation size of <<G as CurveAffine>::Projective> is doubled,  so with same window_size and num_groups, mem needs increase fast.  
 
+> attention: this code removed from 3090 branch.
 # bellperson [![Crates.io](https://img.shields.io/crates/v/bellperson.svg)](https://crates.io/crates/bellperson)
 
 > This is a fork of the great [bellman](https://github.com/zkcrypto/bellman) library.
