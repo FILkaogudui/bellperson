@@ -141,10 +141,10 @@ where
 
         let exp_bits = exp_size::<E>() * 8;
         // let window_size = calc_window_size(n as usize, exp_bits, self.core_count);
-        let window_size = jack_windows_size;
-        let num_windows = ((exp_bits as f64) / (jack_windows_size as f64)).ceil() as usize;
-        let num_groups = calc_num_groups(self.core_count, num_windows);
-        let bucket_len = 1 << jack_windows_size;
+        let mut window_size = jack_windows_size;
+        let mut num_windows = ((exp_bits as f64) / (jack_windows_size as f64)).ceil() as usize;
+        let mut num_groups = calc_num_groups(self.core_count, num_windows);
+        let mut bucket_len = 1 << jack_windows_size;
 
         // let size1 = std::mem::size_of::<G>();
         // let size2 = std::mem::size_of::<<<G::Engine as ScalarEngine>::Fr as PrimeField>::Repr>();
