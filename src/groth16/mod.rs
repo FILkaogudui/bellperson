@@ -8,11 +8,12 @@ mod tests;
 mod ext;
 mod generator;
 mod mapped_params;
-mod params;
+mod params; 
 mod proof;
 mod prover;
 mod verifier;
 mod verifying_key;
+mod locks;
 
 mod multiscalar;
 
