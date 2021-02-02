@@ -419,45 +419,45 @@ where
     };
 
     let a_s;
-    {
-        info!("ZQ: a_s start");
-        let now = Instant::now();
-        let mut fft_kern = Some(LockedFFTKernel::<E>::new(log_d, priority));
-        use crate::groth16::locks;
-        let _lock = locks::FFTLock::lock();
-        a_s = provers
-            .iter_mut()
-            .map(|prover| {
-                let mut a =
-                    EvaluationDomain::from_coeffs(std::mem::replace(&mut prover.a, Vec::new()))?;
-                let mut b =
-                    EvaluationDomain::from_coeffs(std::mem::replace(&mut prover.b, Vec::new()))?;
-                let mut c =
-                    EvaluationDomain::from_coeffs(std::mem::replace(&mut prover.c, Vec::new()))?;
+   {
+    info!("zq: a_s start");
+    let now = instant::now();
+    let mut fft_kern = some(lockedfftkernel::<e>::new(log_d, priority));
+    use crate::groth16::locks;
+    let _lock = locks::FFTLock::lock();
+    a_s = provers
+        .iter_mut()
+        .map(|prover| {
+            let mut a =
+                EvaluationDomain::from_coeffs(std::mem::replace(&mut prover.a, Vec::new()))?;
+            let mut b =
+                EvaluationDomain::from_coeffs(std::mem::replace(&mut prover.b, Vec::new()))?;
+            let mut c =
+                EvaluationDomain::from_coeffs(std::mem::replace(&mut prover.c, Vec::new()))?;
 
-                a.ifft(&worker, &mut fft_kern)?;
-                a.coset_fft(&worker, &mut fft_kern)?;
-                b.ifft(&worker, &mut fft_kern)?;
-                b.coset_fft(&worker, &mut fft_kern)?;
-                c.ifft(&worker, &mut fft_kern)?;
-                c.coset_fft(&worker, &mut fft_kern)?;
+            a.ifft(&worker, &mut fft_kern)?;
+            a.coset_fft(&worker, &mut fft_kern)?;
+            b.ifft(&worker, &mut fft_kern)?;
+            b.coset_fft(&worker, &mut fft_kern)?;
+            c.ifft(&worker, &mut fft_kern)?;
+            c.coset_fft(&worker, &mut fft_kern)?;
 
-                a.mul_assign(&worker, &b);
-                drop(b);
-                a.sub_assign(&worker, &c);
-                drop(c);
-                a.divide_by_z_on_coset(&worker);
-                a.icoset_fft(&worker, &mut fft_kern)?;
+            a.mul_assign(&worker, &b);
+            drop(b);
+            a.sub_assign(&worker, &c);
+            drop(c);
+            a.divide_by_z_on_coset(&worker);
+            a.icoset_fft(&worker, &mut fft_kern)?;
 
-                let mut a = a.into_coeffs();
-                let a_len = a.len() - 1;
-                a.truncate(a_len);
+            let mut a = a.into_coeffs();
+            let a_len = a.len() - 1;
+            a.truncate(a_len);
 
-                Ok(Arc::new(a.into_par_iter().map(|s| s.0.into_repr()).collect::<Vec<_>>()))
-            })
-            .collect::<Result<Vec<_>, SynthesisError>>()?;
-        info!("ZQ: a_s end: {:?}", now.elapsed());
-        drop(fft_kern);
+            Ok(Arc::new(a.into_par_iter().map(|s| s.0.into_repr()).collect::<Vec<_>>()))
+        })
+        .collect::<Result<Vec<_>, SynthesisError>>()?;
+    info!("ZQ: a_s end: {:?}", now.elapsed());
+    drop(fft_kern);
     }
 
 
@@ -497,9 +497,7 @@ where
         })
         .collect::<Result<Vec<_>, SynthesisError>>()?;
     info!("ZQ: l_s end: {:?}", now.elapsed());
-
-
-    info!("ZQ: inputs start");
+   info!("ZQ: inputs start");
     let now = Instant::now();
     let inputs = provers
         .into_iter()
