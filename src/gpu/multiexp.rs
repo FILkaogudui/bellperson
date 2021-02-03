@@ -17,9 +17,9 @@ use std::sync::mpsc;
 extern crate scoped_threadpool;
 use scoped_threadpool::Pool;
 
-const MAX_WINDOW_SIZE: usize = 12;
+// const MAX_WINDOW_SIZE: usize = 12;
 const LOCAL_WORK_SIZE: usize = 256;
-const MEMORY_PADDING: f64 = 0.1f64; // Let 20% of GPU memory be free
+// const MEMORY_PADDING: f64 = 0.1f64; // Let 20% of GPU memory be free
 
 pub fn get_cpu_utilization() -> f64 {
     use std::env;
@@ -74,28 +74,28 @@ fn calc_num_groups(core_count: usize, num_windows: usize) -> usize {
 //     MAX_WINDOW_SIZE
 // }
 
-fn calc_best_chunk_size(max_window_size: usize, core_count: usize, exp_bits: usize) -> usize {
-    // Best chunk-size (N) can also be calculated using the same logic as calc_window_size:
-    // n = e^window_size * window_size * 2 * core_count / exp_bits
-    (((max_window_size as f64).exp() as f64)
-        * (max_window_size as f64)
-        * 2f64
-        * (core_count as f64)
-        / (exp_bits as f64))
-        .ceil() as usize
-}
+// fn calc_best_chunk_size(max_window_size: usize, core_count: usize, exp_bits: usize) -> usize {
+//     // Best chunk-size (N) can also be calculated using the same logic as calc_window_size:
+//     // n = e^window_size * window_size * 2 * core_count / exp_bits
+//     (((max_window_size as f64).exp() as f64)
+//         * (max_window_size as f64)
+//         * 2f64
+//         * (core_count as f64)
+//         / (exp_bits as f64))
+//         .ceil() as usize
+// }
 
-fn calc_chunk_size<E>(mem: u64, core_count: usize) -> usize
-where
-    E: Engine,
-{
-    let aff_size = std::mem::size_of::<E::G1Affine>() + std::mem::size_of::<E::G2Affine>();
-    let exp_size = exp_size::<E>();
-    let proj_size = std::mem::size_of::<E::G1>() + std::mem::size_of::<E::G2>();
-    ((((mem as f64) * (1f64 - MEMORY_PADDING)) as usize)
-        - (2 * core_count * ((1 << MAX_WINDOW_SIZE) + 1) * proj_size))
-        / (aff_size + exp_size)
-}
+// fn calc_chunk_size<E>(mem: u64, core_count: usize) -> usize
+// where
+//     E: Engine,
+// {
+//     let aff_size = std::mem::size_of::<E::G1Affine>() + std::mem::size_of::<E::G2Affine>();
+//     let exp_size = exp_size::<E>();
+//     let proj_size = std::mem::size_of::<E::G1>() + std::mem::size_of::<E::G2>();
+//     ((((mem as f64) * (1f64 - MEMORY_PADDING)) as usize)
+//         - (2 * core_count * ((1 << MAX_WINDOW_SIZE) + 1) * proj_size))
+//         / (aff_size + exp_size)
+// }
 
 fn exp_size<E: Engine>() -> usize {
     std::mem::size_of::<<E::Fr as ff::PrimeField>::Repr>()
@@ -316,7 +316,7 @@ where
         G: CurveAffine,
         <G as groupy::CurveAffine>::Engine: crate::bls::Engine,
     {
-        let num_devices = self.kernels.len();
+        let _num_devices = self.kernels.len();
         // Bases are skipped by `self.1` elements, when converted from (Arc<Vec<G>>, usize) to Source
         // https://github.com/zkcrypto/bellman/blob/10c5010fd9c2ca69442dc9775ea271e286e776d8/src/multiexp.rs#L38
         let bases = &bases[skip..(skip + n)];
