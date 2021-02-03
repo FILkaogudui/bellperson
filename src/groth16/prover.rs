@@ -295,47 +295,6 @@ where
     C: Circuit<E> + Send,
 {
     // build provers
-    info!("ZQ: build provers start");
-    let now = Instant::now();
-    let mut provers = circuits
-        .into_par_iter()
-        .map(|circuit| -> Result<_, SynthesisError> {
-            let mut prover = ProvingAssignment::new();
-            prover.alloc_input(|| "", || Ok(E::Fr::one()))?;
-            circuit.synthesize(&mut prover)?;
-            for i in 0..prover.input_assignment.len() {
-                prover.enforce(|| "", |lc| lc + Variable(Index::Input(i)), |lc| lc, |lc| lc);
-            }
-            Ok(prover)
-        })
-        .collect::<Result<Vec<_>, _>>()?;
-    info!("ZQ: build provers  end: {:?}", now.elapsed());
-
-
-    // Start prover timer
-    info!("ZQ: starting proof timer");
-    let start = Instant::now();
-    let worker = Worker::new();
-    let input_len = provers[0].input_assignment.len();
-    let vk = params.get_vk(input_len)?;
-    let n = provers[0].a.len();
-
-
-    // Make sure all circuits have the same input len.
-    for prover in &provers {
-        assert_eq!(
-            prover.a.len(),
-            n,
-            "only equaly sized circuits are supported"
-        );
-    }
-
-    let mut log_d = 0;
-    while (1 << log_d) < n {
-        log_d += 1;
-    }
-
-
     let a_s;
     let h_params;
     let l_params;
@@ -349,10 +308,52 @@ where
     let h_s;
     let l_s;
     let inputs;
+    let vk;
+    let start;
 
     {
         use crate::groth16::locks;
         let _lock = locks::C2MemLock::lock();
+        info!("ZQ: build provers start");
+        let now = Instant::now();
+        let mut provers = circuits
+            .into_par_iter()
+            .map(|circuit| -> Result<_, SynthesisError> {
+                let mut prover = ProvingAssignment::new();
+                prover.alloc_input(|| "", || Ok(E::Fr::one()))?;
+                circuit.synthesize(&mut prover)?;
+                for i in 0..prover.input_assignment.len() {
+                    prover.enforce(|| "", |lc| lc + Variable(Index::Input(i)), |lc| lc, |lc| lc);
+                }
+                Ok(prover)
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        info!("ZQ: build provers  end: {:?}", now.elapsed());
+
+
+        // Start prover timer
+        info!("ZQ: starting proof timer");
+        start = Instant::now();
+        let worker = Worker::new();
+        let input_len = provers[0].input_assignment.len();
+        vk = params.get_vk(input_len)?;
+        let n = provers[0].a.len();
+
+
+        // Make sure all circuits have the same input len.
+        for prover in &provers {
+            assert_eq!(
+                prover.a.len(),
+                n,
+                "only equaly sized circuits are supported"
+            );
+        }
+
+        let mut log_d = 0;
+        while (1 << log_d) < n {
+            log_d += 1;
+        }
+
         // get params
         info!("ZQ: get params start");
         let now = Instant::now();
