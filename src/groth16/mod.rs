@@ -13,6 +13,7 @@ mod proof;
 mod prover;
 mod verifier;
 mod verifying_key;
+mod locks;
 
 mod multiscalar;
 
