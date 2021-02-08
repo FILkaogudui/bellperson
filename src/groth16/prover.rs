@@ -315,7 +315,7 @@ where
         use crate::groth16::locks;
         let _lock = locks::C2MemLock::lock();
         info!("ZQ: build provers start");
-        let now = Instant::now();
+        let now = Instant::now(); 
         let mut provers = circuits
             .into_par_iter()
             .map(|circuit| -> Result<_, SynthesisError> {
@@ -380,17 +380,17 @@ where
             });
             // a_params
             scoped.execute(move || {
-                let (a_inputs_source, a_aux_source) = params.get_a(input_assignment_len,0).unwrap();
+                let (a_inputs_source, a_aux_source) = params.get_a(input_assignment_len, 0).unwrap();
                 tx_a.send((a_inputs_source, a_aux_source)).unwrap();
             });
             // bg1_params
             scoped.execute(move || {
-                let (b_g1_inputs_source, b_g1_aux_source) = params.get_b_g1(1,0).unwrap();
+                let (b_g1_inputs_source, b_g1_aux_source) = params.get_b_g1(1, 0).unwrap();
                 tx_bg1.send((b_g1_inputs_source, b_g1_aux_source)).unwrap();
             });
             // bg2_params
             scoped.execute(move || {
-                let (b_g2_inputs_source, b_g2_aux_source) = params.get_b_g2(1,0).unwrap();
+                let (b_g2_inputs_source, b_g2_aux_source) = params.get_b_g2(1, 0).unwrap();
                 tx_bg2.send((b_g2_inputs_source, b_g2_aux_source)).unwrap();
             });
             // assignments
@@ -439,7 +439,7 @@ where
 
 
         #[cfg(feature = "gpu")]
-        let prio_lock = if priority {
+            let prio_lock = if priority {
             Some(PriorityLock::lock())
         } else {
             None
@@ -481,6 +481,7 @@ where
             .collect::<Result<Vec<_>, SynthesisError>>()?;
         info!("ZQ: a_s end: {:?}", now.elapsed());
         drop(fft_kern);
+    }
 
         let mut multiexp_kern = Some(LockedMultiexpKernel::<E>::new(log_d, priority));
 
@@ -624,7 +625,6 @@ where
         drop(multiexp_kern);
         #[cfg(feature = "gpu")]
             drop(prio_lock);
-    }
 
     info!("ZQ: proofs start");
     let now = Instant::now();
