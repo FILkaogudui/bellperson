@@ -17,9 +17,9 @@ use std::sync::mpsc;
 extern crate scoped_threadpool;
 use scoped_threadpool::Pool;
 
-// const MAX_WINDOW_SIZE: usize = 11;
+const MAX_WINDOW_SIZE: usize = 12;
 const LOCAL_WORK_SIZE: usize = 256;
-// const MEMORY_PADDING: f64 = 0.1f64; // Let 20% of GPU memory be free
+const MEMORY_PADDING: f64 = 0.1f64; // Let 20% of GPU memory be free
 
 pub fn get_cpu_utilization() -> f64 {
     use std::env;
@@ -116,7 +116,8 @@ E: Engine,
         // let best_n = calc_best_chunk_size(MAX_WINDOW_SIZE, core_count, exp_bits);
         // let n = std::cmp::min(max_n, best_n);
         //这里的n数据不会真正去用
-        let n = 33554466;
+        //let n = 33554466;
+        let n = 67108864;
 
         Ok(SingleMultiexpKernel {
             program: opencl::Program::from_opencl(d, &src)?,
@@ -368,7 +369,7 @@ E: Engine,
                                     let mut jack_windows_size = 11;
                                     let size_result = std::mem::size_of::<<G as CurveAffine>::Projective>();
                                     if size_result > 144 {
-                                        jack_windows_size = 8;
+                                        jack_windows_size = 10;
                                     }
                                     for (bases, exps) in bases.chunks(jack_chunk_3080).zip(exps.chunks(jack_chunk_3080)) {
                                         let result = kern.multiexp(bases, exps, bases.len(), jack_windows_size)?;
