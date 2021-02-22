@@ -8,6 +8,7 @@ use crate::multiexp::{multiexp as cpu_multiexp, FullDensity};
 use ff::{PrimeField, ScalarEngine};
 use groupy::{CurveAffine, CurveProjective};
 use log::{error, info};
+use rayon::prelude::*;
 use rust_gpu_tools::*;
 use std::any::TypeId;
 use std::sync::Arc;
@@ -31,7 +32,7 @@ pub fn get_cpu_utilization() -> f64 {
                 Ok(0f64)
             }
         })
-    .unwrap_or(0f64)
+        .unwrap_or(0f64)
         .max(0f64)
         .min(1f64)
 }
@@ -39,7 +40,7 @@ pub fn get_cpu_utilization() -> f64 {
 // Multiexp kernel for a single GPU
 pub struct SingleMultiexpKernel<E>
 where
-E: Engine,
+    E: Engine,
 {
     program: opencl::Program,
 
@@ -101,10 +102,9 @@ fn exp_size<E: Engine>() -> usize {
     std::mem::size_of::<<E::Fr as ff::PrimeField>::Repr>()
 }
 
-// 单卡单任务
 impl<E> SingleMultiexpKernel<E>
 where
-E: Engine,
+    E: Engine,
 {
     pub fn create(d: opencl::Device, priority: bool) -> GPUResult<SingleMultiexpKernel<E>> {
         let src = sources::kernel::<E>(d.brand() == opencl::Brand::Nvidia);
@@ -115,7 +115,6 @@ E: Engine,
         // let max_n = calc_chunk_size::<E>(mem, core_count);
         // let best_n = calc_best_chunk_size(MAX_WINDOW_SIZE, core_count, exp_bits);
         // let n = std::cmp::min(max_n, best_n);
-        //这里的n数据不会真正去用
         //let n = 33554466;
         let n = 67108864;
 
@@ -259,7 +258,7 @@ E: Engine,
 // A struct that containts several multiexp kernels for different devices
 pub struct MultiexpKernel<E>
 where
-E: Engine,
+    E: Engine,
 {
     kernels: Vec<SingleMultiexpKernel<E>>,
     _lock: locks::GPULock, // RFC 1857: struct fields are dropped in the same order as they are declared.
@@ -267,7 +266,7 @@ E: Engine,
 
 impl<E> MultiexpKernel<E>
 where
-E: Engine,
+    E: Engine,
 {
     pub fn create(priority: bool) -> GPUResult<MultiexpKernel<E>> {
         let lock = locks::GPULock::lock();
@@ -283,11 +282,11 @@ E: Engine,
                         "Cannot initialize kernel for device '{}'! Error: {}",
                         device.name(),
                         e
-                        );
+                    );
                 }
                 res.ok()
             })
-        .collect();
+            .collect();
 
         if kernels.is_empty() {
             return Err(GPUError::Simple("No working GPUs found!"));
@@ -296,14 +295,14 @@ E: Engine,
             "Multiexp: {} working device(s) selected. (CPU utilization: {})",
             kernels.len(),
             get_cpu_utilization()
-            );
+        );
         for (i, k) in kernels.iter().enumerate() {
             info!(
                 "Multiexp: Device {}: {} (Chunk-size: {})",
                 i,
                 k.program.device().name(),
                 k.n
-                );
+            );
         }
         Ok(MultiexpKernel::<E> {
             kernels,
@@ -318,8 +317,8 @@ E: Engine,
         exps: Arc<Vec<<<G::Engine as ScalarEngine>::Fr as PrimeField>::Repr>>,
         skip: usize,
         n: usize,
-        ) -> GPUResult<<G as CurveAffine>::Projective>
-        where
+    ) -> GPUResult<<G as CurveAffine>::Projective>
+    where
         G: CurveAffine,
         <G as groupy::CurveAffine>::Engine: crate::bls::Engine,
         {
@@ -333,11 +332,11 @@ E: Engine,
             let (cpu_bases, bases) = bases.split_at(cpu_n);
             let (cpu_exps, exps) = exps.split_at(cpu_n);
             let chunk_size = ((n as f64) / (num_devices as f64)).ceil() as usize;
-            //ZQ: h_s的
-            //这个是总的，In multiexp chunk_size is ---- :134217727， 现在拆分成20000000一次，循环7次
+            //ZQ: h_s��
+            //������ܵģ�In multiexp chunk_size is ---- :134217727�� ���ڲ�ֳ�20000000һ�Σ�ѭ��7��
 
-            //ZQ: l_s start的
-            //In multiexp chunk_size is ---- :130169893，会有写差异
+            //ZQ: l_s start��
+            //In multiexp chunk_size is ---- :130169893������д����
 
 
             // ZQ: inputs start
