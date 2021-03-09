@@ -663,17 +663,21 @@ where
                     g_c.add_assign(&vk.alpha_g1.mul(s));
                     g_c.add_assign(&vk.beta_g1.mul(r));
                 }
+
+                info!("YEYELOG wait err trace 0");
                 let mut a_answer = a_inputs.wait()?;
                 a_answer.add_assign(&a_aux.wait()?);
                 g_a.add_assign(&a_answer);
                 a_answer.mul_assign(s);
                 g_c.add_assign(&a_answer);
 
+                info!("YEYELOG wait err trace 1");
                 let mut b1_answer = b_g1_inputs.wait()?;
                 b1_answer.add_assign(&b_g1_aux.wait()?);
                 let mut b2_answer = b_g2_inputs.wait()?;
                 b2_answer.add_assign(&b_g2_aux.wait()?);
 
+                info!("YEYELOG wait err trace 2");
                 g_b.add_assign(&b2_answer);
                 b1_answer.mul_assign(r);
                 g_c.add_assign(&b1_answer);
